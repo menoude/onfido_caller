@@ -1,0 +1,12 @@
+[package]
+name = "onfido-caller"
+version = "0.1.0"
+authors = ["mennad"]
+edition = "2018"
+
+[dependencies]
+iron="0.6.0"
+reqwest = "0.9.16"
+url = "1.7.2"
+serde_json = "1.0.39"
+serde = { version="1.0.91", features=["derive"]}
