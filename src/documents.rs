@@ -1,8 +1,11 @@
-use std::error::Error;
+use crate::*;
+use reqwest::Url;
+use serde::Deserialize;
+use serde::Serialize;
 use std::fs;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Document {
     id: Option<String>,
     created_at: Option<String>,
@@ -17,7 +20,23 @@ pub struct Document {
 }
 
 impl Document {
-    pub fn read_file(path: PathBuf) -> Result<Vec<u8>, Box<dyn Error>> {
+    pub fn read_file(path: PathBuf) -> Result<Vec<u8>> {
         Ok(fs::read(path)?)
     }
+}
+
+pub fn upload_doc(api_token: &str, path: &str, applicant: &Applicant) -> Result<String> {
+    let file = Document::read_file(PathBuf::from(path))?;
+    let resp = post_data_onfido(
+        Url::parse(
+            format!(
+                "https://api.onfido.com/v2/applicants/{}/documents/",
+                applicant.get_id()
+            )
+            .as_str(),
+        )?,
+        api_token,
+        file,
+    )?;
+    Ok(resp)
 }

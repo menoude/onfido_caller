@@ -1,3 +1,5 @@
+use crate::*;
+use reqwest::Url;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
@@ -65,18 +67,12 @@ pub struct Applicant {
     town_of_birth: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ApplicantsList {
-    pub applicants: Vec<Applicant>,
-}
-
-impl Display for ApplicantsList {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match serde_json::to_string_pretty(&self) {
-            Ok(pretty) => write!(f, "{}", pretty),
-            Err(_) => Err(fmt::Error),
-        }
-    }
+pub fn create_applicant(api_token: &str, app: Applicant) -> Result<Applicant> {
+    let url = Url::parse("https://api.onfido.com/v2/applicants/")?;
+    let payload: String = app.into();
+    println!("{:?}", payload);
+    let resp = post_onfido(url, api_token, payload)?.json()?;
+    Ok(resp)
 }
 
 impl Applicant {
@@ -102,16 +98,35 @@ impl Applicant {
         )
     }
 
-    pub fn get_id(&self) -> String {
+    pub fn get_id(&self) -> &str {
         match &self.id {
-            Some(id) => id.to_string(),
-            None => String::from("null"),
+            Some(id) => id,
+            None => "null",
         }
+    }
+
+    pub fn delete(&self, api_token: &str) -> Result<()> {
+        let answer_delete = delete_onfido(
+            Url::parse("https://api.onfido.com/v2/applicants/")
+                .and_then(|url| url.join(self.get_id()))?,
+            api_token,
+        )?;
+        println!("{}", answer_delete);
+        Ok(())
     }
 }
 
 impl Into<String> for Applicant {
     fn into(self) -> String {
         serde_json::to_string(&self).unwrap()
+    }
+}
+
+impl Display for Applicant {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match serde_json::to_string_pretty(&self) {
+            Ok(pretty) => write!(f, "{}", pretty),
+            Err(_) => Err(fmt::Error),
+        }
     }
 }
