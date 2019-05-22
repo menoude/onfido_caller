@@ -25,28 +25,44 @@ pub struct IdNumber {
     state_code: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Applicant {
-    id: Option<String>,
-    created_at: Option<String>,
-    delete_at: Option<String>,
-    href: Option<String>,
-    title: Option<String>,
-    pub first_name: String,
-    middle_name: Option<String>,
-    pub last_name: String,
-    gender: Option<String>,
-    dob: Option<String>,
-    telephone: Option<String>,
-    mobile: Option<String>,
-    country: Option<String>,
-    mothers_maiden_name: Option<String>,
-    previous_last_name: Option<String>,
-    nationality: Option<String>,
-    country_of_birth: Option<String>,
-    town_of_birth: Option<String>,
+    first_name: Option<String>,
+    last_name: Option<String>,
     id_numbers: Vec<IdNumber>,
     addresses: Vec<Address>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    created_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    delete_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    href: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    middle_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    gender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    dob: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    telephone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mobile: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mothers_maiden_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    previous_last_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    nationality: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country_of_birth: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    town_of_birth: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -64,52 +80,38 @@ impl Display for ApplicantsList {
 }
 
 impl Applicant {
-    pub fn new(first_name: &str, last_name: &str) -> Self {
+    pub fn new(first_name: Option<&str>, last_name: Option<&str>) -> Self {
         Applicant {
-            first_name: first_name.to_owned(),
-            last_name: last_name.to_owned(),
-            id: None,
-            created_at: None,
-            delete_at: None,
-            href: None,
-            title: None,
-            middle_name: None,
-            gender: None,
-            dob: None,
-            telephone: None,
-            mobile: None,
-            country: None,
-            mothers_maiden_name: None,
-            previous_last_name: None,
-            nationality: None,
-            country_of_birth: None,
-            town_of_birth: None,
-            id_numbers: vec![IdNumber {
-                r#type: None,
-                value: None,
-                state_code: None,
-            }],
-            addresses: vec![Address {
-                flat_number: None,
-                building_name: None,
-                building_number: None,
-                street: None,
-                sub_street: None,
-                state: None,
-                town: None,
-                postcode: None,
-                country: None,
-                start_date: None,
-                end_date: None,
-            }],
+            first_name: first_name.map(|name| name.to_owned()),
+            last_name: last_name.map(|name| name.to_owned()),
+            ..Default::default()
         }
     }
 
-    pub fn get_name(&mut self) -> String {
-        format!("{} {}", self.first_name, self.last_name)
+    pub fn get_name(&self) -> String {
+        format!(
+            "{} {}",
+            match &self.first_name {
+                Some(name) => &name,
+                None => "null",
+            },
+            match &self.last_name {
+                Some(name) => &name,
+                None => "null",
+            }
+        )
     }
 
-    pub fn get_id(self) -> String {
-        self.id.unwrap()
+    pub fn get_id(&self) -> String {
+        match &self.id {
+            Some(id) => id.to_string(),
+            None => String::from("null"),
+        }
+    }
+}
+
+impl Into<String> for Applicant {
+    fn into(self) -> String {
+        serde_json::to_string(&self).unwrap()
     }
 }
