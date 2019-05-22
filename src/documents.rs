@@ -27,14 +27,12 @@ impl Document {
 
 pub fn upload_doc(api_token: &str, path: &str, applicant: &Applicant) -> Result<String> {
     let file = Document::read_file(PathBuf::from(path))?;
+    // write a copy to test that the file was correctly read
     let resp = post_data_onfido(
-        Url::parse(
-            format!(
-                "https://api.onfido.com/v2/applicants/{}/documents/",
-                applicant.get_id()
-            )
-            .as_str(),
-        )?,
+        Url::parse(&format!(
+            "https://api.onfido.com/v2/applicants/{}/documents/",
+            applicant.get_id()
+        ))?,
         api_token,
         file,
     )?;
