@@ -31,7 +31,7 @@ pub fn post_onfido(url: Url, api_token: &str, payload: String) -> Result<reqwest
     Ok(resp)
 }
 
-pub fn post_data_onfido(url: Url, api_token: &str, payload: Vec<u8>) -> Result<String> {
+pub fn post_data_onfido(url: Url, api_token: &str, payload: String) -> Result<String> {
     let mut headers = header::HeaderMap::new();
     headers.append(
         header::AUTHORIZATION,

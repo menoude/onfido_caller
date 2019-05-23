@@ -20,12 +20,12 @@ pub fn run(api_token: &str) -> Result<()> {
     println!("{}", created_applicant);
     let app_list = ApplicantsList::get_applicant_list(api_token)?;
     println!("{}", app_list);
-    // app_list.clean_double_applicants(api_token)?;
-    // let updated_list = ApplicantsList::get_applicant_list(api_token)?;
-    // println!("{}", updated_list);
+    app_list.clean_double_applicants(api_token)?;
+    let updated_list = ApplicantsList::get_applicant_list(api_token)?;
+    println!("{}", updated_list);
     let doc_result = upload_doc(
         api_token,
-        "/Users/mennad/Pictures/meyami.jpg",
+        "/Users/mennad/Pictures/photo diplo.jpg",
         &created_applicant,
     )?;
     println!("{}", doc_result);
