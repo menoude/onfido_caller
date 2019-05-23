@@ -1,10 +1,10 @@
-use std::error::Error;
+use crate::*;
 use std::io;
 use std::io::prelude::*;
 
 /// Gets an environment variable, asks for it if it didn't find it,
 /// then returns a Box<io::Error> if the user input fails to be read.
-pub fn get_env_var(var_name: &str) -> Result<String, Box<Error>> {
+pub fn get_env_var(var_name: &str) -> Result<String> {
     match std::env::var(var_name) {
         Ok(token) => Ok(token),
         Err(e) => {
