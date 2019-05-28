@@ -2,6 +2,8 @@ use crate::*;
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use std::borrow::ToOwned;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
@@ -69,8 +71,7 @@ pub struct Applicant {
 
 pub fn create_applicant(api_token: &str, app: Applicant) -> Result<Applicant> {
     let url = Url::parse("https://api.onfido.com/v2/applicants/")?;
-    let payload: String = app.into();
-    println!("{:?}", payload);
+    let payload: String = String::try_from(app)?;
     let resp = post_onfido(url, api_token, payload)?.json()?;
     Ok(resp)
 }
@@ -78,8 +79,8 @@ pub fn create_applicant(api_token: &str, app: Applicant) -> Result<Applicant> {
 impl Applicant {
     pub fn new(first_name: Option<&str>, last_name: Option<&str>) -> Self {
         Applicant {
-            first_name: first_name.map(|name| name.to_owned()),
-            last_name: last_name.map(|name| name.to_owned()),
+            first_name: first_name.map(ToOwned::to_owned),
+            last_name: last_name.map(ToOwned::to_owned),
             ..Default::default()
         }
     }
@@ -116,9 +117,10 @@ impl Applicant {
     }
 }
 
-impl Into<String> for Applicant {
-    fn into(self) -> String {
-        serde_json::to_string(&self).unwrap()
+impl TryFrom<Applicant> for String {
+    type Error = OnfidoError;
+    fn try_from(app: Applicant) -> std::result::Result<Self, Self::Error> {
+        Ok(serde_json::to_string(&app).map_err(OnfidoError::Serialiaze)?)
     }
 }
 

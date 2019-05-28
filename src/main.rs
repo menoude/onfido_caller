@@ -8,7 +8,8 @@ fn main() {
         eprintln!("Please set up your api token with \"export API_TOKEN=<your token>\"");
         process::exit(1);
     });
-    if let Err(_) = run(&api_token) {
+    if let Err(e) = run(&api_token) {
+        eprintln!("Error: {}", e);
         process::exit(1);
     }
 }

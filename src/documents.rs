@@ -2,10 +2,9 @@ use crate::*;
 use reqwest::Url;
 use serde::Deserialize;
 use serde::Serialize;
-use std::convert::Into;
 use std::fs;
-use std::io;
 use std::path::PathBuf;
+use std::string::ToString;
 
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Document {
@@ -21,7 +20,7 @@ pub struct Document {
     #[serde(skip_serializing_if = "Option::is_none")]
     file_type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    file_size: Option<String>,
+    file_size: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     side: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -34,16 +33,11 @@ pub struct Document {
 
 impl Document {
     pub fn new(path: PathBuf) -> Result<Self> {
-        let doc_type = match path.extension() {
-            Some(ext) => ext.to_str().map(|ext| ext.to_string()),
-            None => {
-                return Err(Box::new(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "Invalid extension file",
-                )))
-            }
-        };
-
+        let doc_type = path
+            .extension()
+            .ok_or(OnfidoError::FileType)?
+            .to_str()
+            .map(ToString::to_string);
         let file = fs::read(path)?;
         let doc = Document {
             r#type: doc_type,
@@ -57,8 +51,8 @@ impl Document {
     //     match self.file_type
     // }
 
-    pub fn to_string(self) -> Result<String> {
-        Ok(serde_json::to_string(&self)?)
+    pub fn to_string(&self) -> Result<String> {
+        Ok(serde_json::to_string(self)?)
     }
 }
 
